@@ -1,5 +1,9 @@
 import "./App.css";
 import { useEffect, useState } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import ItemDetails from "./pages/ItemDetails";
+import priorityIcon from "./assets/high-priority.svg";
+import AddItem from "./pages/AddItem";
 
 function App() {
   const [inventory, setInventory] = useState([]);
@@ -7,6 +11,11 @@ function App() {
   const [quantity, setQuantity] = useState("");
   const [date, setDate] = useState("");
   const [category, setCategory] = useState("Groceries");
+  const [search, setSearch] = useState("");
+
+  const searchResults = inventory.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   function loadInventory() {
     fetch("http://localhost:3000/items")
@@ -45,66 +54,78 @@ function App() {
   }
 
   return (
-    <div>
-      <h1>Inventory Tracker Dashboard</h1>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div className="home-page">
+            <div className="top-actions">
+              <Link to="/add-item">
+                <button className="add-item-button">Add to Inventory</button>
+              </Link>
+            </div>
+            <div className="hero-section">
+              <h1 className="hero-title">StockPilot</h1>
 
-      <div className="dashboard-grid">
-        <section className="card">
-          <h2>Low Stock Alerts</h2>
-          <p>Loading...</p>
-        </section>
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Search your inventory..."
+                  className="search-input"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
 
-        <section className="card">
-          <h2>Quick Add Item</h2>
+                {search && (
+                  <ul className="search-dropdown">
+                    {searchResults.map((item) => (
+                      <li key={item.id}>
+                        <Link
+                          to={`/items/${item.id}`}
+                          className="search-result"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
 
-          <input
-            type="text"
-            placeholder="Item Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="number"
-            placeholder="Quantity"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          />
+            <section className="lowstock-section">
+              <div className="section-header">
+                <div className="lowstock-heading">
+                  <h2>Low Stock</h2>
+                  <img
+                    src={priorityIcon}
+                    alt="Priority Icon"
+                    className="priority-icon"
+                  />
+                </div>
+              </div>
 
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option>Groceries</option>
-            <option>Electronics</option>
-            <option>Hardlines</option>
-            <option>Fresh</option>
-            <option>Softlines</option>
-            <option>Health and Beauty</option>
-            <option>Beer and Wine</option>
-            <option>Other</option>
-          </select>
+              <div className="lowstock-grid">
+                {inventory.map((item) => (
+                  <div key={item.id} className="lowstock-card">
+                    <div className="lowstock-top">
+                      <span className="lowstock-name">{item.name}</span>
 
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+                      <span className="lowstock-qty">{item.quantity}</span>
+                    </div>
 
-          <button onClick={addItem}>Add Item</button>
-        </section>
+                    <span className="lowstock-category">{item.category}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        }
+      />
 
-        <section className="card">
-          <h2>Full Inventory</h2>
-
-          {inventory.map((item) => (
-            <p key={item.id}>
-              {item.name} ({item.category}) - QTY: {item.quantity}
-              <button onClick={() => deleteItem(item.id)}>Delete</button>
-            </p>
-          ))}
-        </section>
-      </div>
-    </div>
+      <Route path="/items/:id" element={<ItemDetails />} />
+      <Route path="/add-item" element={<AddItem />} />
+    </Routes>
   );
 }
 

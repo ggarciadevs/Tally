@@ -103,6 +103,8 @@
   border: 1px solid #e5e7eb;
   border-radius: 20px;
   padding: 22px;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -282,5 +284,85 @@
 }
 .add-item-form button:hover {
   background-color: #111827;
+  transform: translateY(-1px);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 32px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+.back-link:hover {
+  color: #111827;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto 40px;
+}
+
+.card {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 24px;
+}
+.card h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.card p {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.item-actions {
+  display: flex;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.btn-primary {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 14px;
+  background-color: #111827;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background-color: #000;
+  transform: translateY(-1px);
+}
+.btn-danger {
+  flex: 1;
+  height: 56px;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background-color: white;
+  color: #dc2626;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-danger:hover {
+  background-color: #fef2f2;
   transform: translateY(-1px);
 }

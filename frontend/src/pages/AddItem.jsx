@@ -1,67 +1,74 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createItem } from "../api";
+
+const CATEGORIES = [
+  "Groceries",
+  "Hardlines",
+  "Fresh",
+  "Electronics",
+  "Health Beauty and Aid",
+  "Beer and Wine",
+  "Softlines",
+  "Other",
+];
 
 function AddItem() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Groceries");
+  const [lowStockThreshold, setLowStockThreshold] = useState("");
+  const [error, setError] = useState(null);
 
-  function handleSumbit() {
-    const item = {
-      id: Date.now(),
-      name: name,
-      quantity: quantity,
-      category: category,
-      date: new Date().toISOString().split("T")[0],
-    };
-    fetch("http://localhost:3000/items", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(item),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Added:", data);
-        setName("");
-        setQuantity("");
-        setCategory("");
+  async function handleSubmit() {
+    setError(null);
+    try {
+      await createItem({
+        name,
+        quantity: Number(quantity),
+        category,
+        low_stock_threshold: lowStockThreshold ? Number(lowStockThreshold) : null,
+        date: new Date().toISOString().split("T")[0],
       });
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    }
   }
+
   return (
     <div className="add-item-page">
-      <h1 className="add-item-title">Add to inventory</h1>
+      <h1 className="add-item-title">Add to Inventory</h1>
+      {error && <p className="error-message">{error}</p>}
       <div className="add-item-form">
         <input
           type="text"
-          placeholder="Enter item name"
+          placeholder="Item name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option>Groceries</option>
-          <option>Hardlines</option>
-          <option>Fresh</option>
-          <option>Electronics</option>
-          <option>Health Beauty and Aid</option>
-          <option>Beer and Wine</option>
-          <option>Softlines</option>
-          <option>Other</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat}>{cat}</option>
+          ))}
         </select>
-
-        <input type="text" placeholder="SKU" />
-
         <input
           type="number"
           placeholder="Quantity"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
         />
-
-        <button onClick={handleSumbit}>Add Item</button>
+        <input
+          type="number"
+          placeholder="Low stock threshold"
+          value={lowStockThreshold}
+          onChange={(e) => setLowStockThreshold(e.target.value)}
+        />
+        <button onClick={handleSubmit}>Add Item</button>
       </div>
     </div>
   );
 }
+
 export default AddItem;

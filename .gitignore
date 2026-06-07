@@ -1,2 +1,5 @@
 node_modules/
 inventory-backend/inventory.db
+.env
+.env.local
+CLAUDE.md

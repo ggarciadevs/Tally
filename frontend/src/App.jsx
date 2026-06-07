@@ -1,57 +1,31 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import ItemDetails from "./pages/ItemDetails";
 import priorityIcon from "./assets/high-priority.svg";
 import AddItem from "./pages/AddItem";
+import { getItems, getLowStockItems } from "./api";
 
 function App() {
   const [inventory, setInventory] = useState([]);
-  const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [date, setDate] = useState("");
-  const [category, setCategory] = useState("Groceries");
+  const [lowStockItems, setLowStockItems] = useState([]);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState(null);
+  const location = useLocation();
 
   const searchResults = inventory.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
+    item.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  function loadInventory() {
-    fetch("http://localhost:3000/items")
-      .then((res) => res.json())
-      .then((data) => setInventory(data));
-  }
-
   useEffect(() => {
-    loadInventory();
-  }, []);
-  function addItem() {
-    const item = {
-      id: Date.now(),
-      name: name,
-      quantity: Number(quantity),
-      category: category,
-      date: date,
-    };
-    console.log(item);
-    fetch("http://localhost:3000/items", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(item),
-    }).then(() => {
-      loadInventory();
-    });
-  }
-  function deleteItem(id) {
-    fetch(`http://localhost:3000/items/${id}`, {
-      method: "DELETE",
-    }).then(() => {
-      loadInventory();
-    });
-  }
+    getItems()
+      .then(setInventory)
+      .catch(() => setError("Failed to load inventory"));
+
+    getLowStockItems()
+      .then(setLowStockItems)
+      .catch(() => setError("Failed to load low stock alerts"));
+  }, [location]);
 
   return (
     <Routes>
@@ -65,7 +39,9 @@ function App() {
               </Link>
             </div>
             <div className="hero-section">
-              <h1 className="hero-title">StockPilot</h1>
+              <h1 className="hero-title">Tally</h1>
+
+              {error && <p className="error-message">{error}</p>}
 
               <div className="search-container">
                 <input
@@ -75,7 +51,6 @@ function App() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-
                 {search && (
                   <ul className="search-dropdown">
                     {searchResults.map((item) => (
@@ -106,23 +81,24 @@ function App() {
               </div>
 
               <div className="lowstock-grid">
-                {inventory.map((item) => (
-                  <div key={item.id} className="lowstock-card">
-                    <div className="lowstock-top">
-                      <span className="lowstock-name">{item.name}</span>
-
-                      <span className="lowstock-qty">{item.quantity}</span>
-                    </div>
-
-                    <span className="lowstock-category">{item.category}</span>
-                  </div>
-                ))}
+                {lowStockItems.length === 0 ? (
+                  <p>No low stock items.</p>
+                ) : (
+                  lowStockItems.map((item) => (
+                    <Link key={item.id} to={`/items/${item.id}`} className="lowstock-card">
+                      <div className="lowstock-top">
+                        <span className="lowstock-name">{item.name}</span>
+                        <span className="lowstock-qty">{item.quantity}</span>
+                      </div>
+                      <span className="lowstock-category">{item.category}</span>
+                    </Link>
+                  ))
+                )}
               </div>
             </section>
           </div>
         }
       />
-
       <Route path="/items/:id" element={<ItemDetails />} />
       <Route path="/add-item" element={<AddItem />} />
     </Routes>
